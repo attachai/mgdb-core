@@ -7,17 +7,17 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/attachai/core/app/models/model_name_db/db/service"
+	"github.com/attachai/mgdb-core/app/models/model_name_db/db/service"
 
 	"fmt"
 	"reflect"
 	"time"
 
-	"github.com/attachai/core/app/models/model_name_db/structs"
-	structService "github.com/attachai/core/app/structs"
-	"github.com/attachai/core/packages/logging"
-	"github.com/attachai/core/packages/setting"
-	"github.com/attachai/core/utils"
+	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
+	structService "github.com/attachai/mgdb-core/app/structs"
+	"github.com/attachai/mgdb-core/packages/logging"
+	"github.com/attachai/mgdb-core/packages/setting"
+	"github.com/attachai/mgdb-core/utils"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"

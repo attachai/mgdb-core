@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/attachai/core/packages/setting"
-	"github.com/attachai/core/utils"
+	"github.com/attachai/mgdb-core/packages/setting"
+	"github.com/attachai/mgdb-core/utils"
 	"github.com/sirupsen/logrus"
 )
 

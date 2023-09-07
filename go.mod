@@ -1,4 +1,4 @@
-module github.com/attachai/core
+module github.com/attachai/mgdb-core
 
 go 1.16
 
