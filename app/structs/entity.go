@@ -7,7 +7,7 @@ type Jsonresponse struct {
 	SaveStatus bool        `json:"saveStatus"`
 }
 
-//Jsonbody to service
+// Jsonbody to service
 type JsonService struct {
 	Collection   string      `json:"collection"`
 	Reference    string      `json:"reference"`
@@ -45,7 +45,15 @@ type Image struct {
 }
 
 type NameInfo struct {
-	Id   string `json:"id,omitempty"`
-	Name string `json:"name,omitempty"`
-	IsDefault  *bool `json:"isDefault,omitempty"`
+	Id        string `json:"id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	IsDefault *bool  `json:"isDefault,omitempty"`
+}
+
+type LogConfiguration struct {
+	Server      string `json:"id,omitempty"`
+	AppId       string `json:"appId,omitempty"`
+	AppName     string `json:"appName,omitempty"`
+	Level       string `json:"logLevel,omitempty"`
+	OnServerLog bool   `json:"onServerLog,omitempty"`
 }

@@ -3,30 +3,57 @@ package logging
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 
-	"github.com/attachai/mgdb-core/packages/setting"
+	cnst "github.com/attachai/mgdb-core/app/const"
+	"github.com/attachai/mgdb-core/app/structs"
 	"github.com/attachai/mgdb-core/utils"
 	"github.com/sirupsen/logrus"
 )
 
 type LoggingServiceBackend struct{}
 
-func SaveLog(data Jsonbodylog) {
-	path := utils.GetEnvVariable("ServerLogging")
+var Debug = cnst.Debug
+var Info = cnst.Info
+var Warning = cnst.Warning
+var Error = cnst.Error
+var Fatal = cnst.Fatal
+var logconfig structs.LogConfiguration
+
+func InitLog(logconfigInit structs.LogConfiguration) {
+	logconfig = logconfigInit
+	logLevel := logconfig.Level
+	logrus.SetLevel(getLogLevel(logLevel))
+	// logrus.SetFormatter(&logrus.JSONFormatter{})
+	logrus.SetFormatter(&logrus.TextFormatter{
+		FullTimestamp: true,
+		ForceColors:   true,
+		DisableColors: false,
+	})
+}
+
+func sendLogger(data Jsonbodylog) {
+	defer func() {
+		if err := recover(); err != nil {
+			logrus.Error("panic occurred:", err)
+		}
+	}()
+	sendToServerLog(data)
+}
+
+func sendToServerLog(data Jsonbodylog) {
+	path := logconfig.Server
 	service := "api/logging"
 	url := path + "/" + service
 
 	byteData, err := json.Marshal(data)
 	if err != nil {
-		fmt.Println(err)
+		logrus.Error("err", err)
 	}
 	var jsonStr = []byte(string(byteData))
-	log.Println("send log json :", string(byteData))
+	// log.Println("send log json :", string(byteData))
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	req.Header.Set("X-Custom-Header", "myvalue")
 	req.Header.Set("Content-Type", "application/json")
@@ -42,98 +69,98 @@ func SaveLog(data Jsonbodylog) {
 	body, _ := ioutil.ReadAll(resp.Body)
 	var result JsonResponseEror
 	json.Unmarshal([]byte(body), &result)
-	fmt.Printf("%+v\n", result)
+	// fmt.Printf("%+v\n", result)
 }
 
-func Logger(logTax string, input interface{}) {
-	// var bodyMap map[string]interface{}
-	logLevel := utils.GetEnvVariable("logLevel")
-	logger := logrus.New()
-
-	logger.SetFormatter(&logrus.JSONFormatter{})
-	if logLevel == logTax && logLevel == setting.LogLevelSetting.Debug {
-		log.Println(input)
-		// logBody := logger.WithFields(logrus.Fields{
-		// 	"app_id":   setting.AppSetting.AppId,
-		// 	"app_name": setting.AppSetting.AppName,
-		// })
-		// logBody.Level = getLogLevel(logTax)
-		// bye, _ := logBody.Bytes()
-		// err := json.Unmarshal(bye, &bodyMap)
-		// if err != nil {
-		// 	panic(err)
-		// }
-		// bodyMap["message"] = input
-		// bodyMap["time"] = time.Now().Format("01-02-2006 15:04:05")
-		var logObj Jsonbodylog
-		logObj.App_id = utils.GetEnvVariable("AppID")
-		logObj.App_name = utils.GetEnvVariable("AppName")
-		logObj.Level = getLogLevel(logTax).String()
-		logObj.Message = input
-		log.Println("send data : ", logObj)
-		SaveLog(logObj)
-	} else {
-		///เขียนอย่างเดียว
-		state := getLogState(logLevel)
-		if utils.ContainInSlice(state, logTax) {
-			// logBody := logger.WithFields(logrus.Fields{
-			// 	"app_id":   setting.AppSetting.AppId,
-			// 	"app_name": setting.AppSetting.AppName,
-			// })
-			// logBody.Level = getLogLevel(logTax)
-			// bye, _ := logBody.Bytes()
-			// err := json.Unmarshal(bye, &bodyMap)
-			// if err != nil {
-			// 	panic(err)
-			// }
-			// bodyMap["msg"] = input
-			// bodyMap["time"] = time.Now().Format("01-02-2006 15:04:05")
-			var logObj Jsonbodylog
-			logObj.App_id = utils.GetEnvVariable("AppID")
-			logObj.App_name = utils.GetEnvVariable("AppName")
-			logObj.Level = getLogLevel(logTax).String()
-			logObj.Message = input
-			log.Println("send data : ", logObj)
-			SaveLog(logObj)
+func Logger(logLevel string, massage interface{}, saveLog_option ...bool) {
+	saveLog := true
+	if len(saveLog_option) > 0 {
+		saveLog = saveLog_option[0]
+	}
+	isServerLog := logconfig.OnServerLog
+	if logLevel == Debug {
+		logrus.Debug(massage)
+		if isServerLog && saveLog {
+			verifyLogger(logLevel, massage)
+		}
+	} else if logLevel == Info {
+		logrus.Info(massage)
+		if isServerLog && saveLog {
+			verifyLogger(logLevel, massage)
+		}
+	} else if logLevel == Warning {
+		logrus.Warn(massage)
+		if isServerLog && saveLog {
+			verifyLogger(logLevel, massage)
+		}
+	} else if logLevel == Error {
+		logrus.Error(massage)
+		if isServerLog && saveLog {
+			verifyLogger(logLevel, massage)
+		}
+	} else if logLevel == Fatal {
+		logrus.Fatal(massage)
+		if isServerLog && saveLog {
+			verifyLogger(logLevel, massage)
 		}
 	}
 }
 
+func verifyLogger(logLevel string, massage interface{}) {
+	var logObj Jsonbodylog
+	logObj.App_id = logconfig.AppId
+	logObj.App_name = logconfig.AppName
+	logObj.Level = getLogLevel(logLevel).String()
+	logObj.Message = massage
+
+	isServerLog := logconfig.OnServerLog
+	logLevelEnv := logconfig.Level
+	if isServerLog {
+		if logLevelEnv == logLevel && logLevelEnv == Debug {
+			sendLogger(logObj)
+		} else {
+			state := getLogState(logLevelEnv)
+			if utils.ContainInSlice(state, logLevel) {
+				sendLogger(logObj)
+			}
+		}
+	}
+
+}
 func getLogState(level string) []string {
-	debugLvl := []string{"debug", "info", "warning", "error", "fatal"}
-	infoLvl := []string{"info", "warning", "error", "fatal"}
-	warningLvl := []string{"warning", "error", "fatal"}
-	errorLvl := []string{"error", "fatal"}
-	fatalLvl := []string{"fatal"}
+	debugLvl := []string{Debug, Info, Warning, Error, Fatal}
+	infoLvl := []string{Info, Warning, Error, Fatal}
+	warningLvl := []string{Warning, Error, Fatal}
+	errorLvl := []string{Error, Fatal}
+	fatalLvl := []string{Fatal}
 	switch level {
-	case "debug":
+	case Debug:
 		return debugLvl
-	case "info":
+	case Info:
 		return infoLvl
-	case "warning":
+	case Warning:
 		return warningLvl
-	case "error":
+	case Error:
 		return errorLvl
-	case "fatal":
+	case Fatal:
 		return fatalLvl
 
 	}
 	return nil
 }
 
-func getLogLevel(logTag string) logrus.Level {
-	switch logTag {
-	case "debug":
+func getLogLevel(logLevel string) logrus.Level {
+	switch logLevel {
+	case Debug:
 		return logrus.DebugLevel
-	case "info":
+	case Info:
 		return logrus.InfoLevel
-	case "warning":
+	case Warning:
 		return logrus.WarnLevel
-	case "error":
+	case Error:
 		return logrus.ErrorLevel
-	case "fatal":
+	case Fatal:
 		return logrus.FatalLevel
-
 	}
 	return logrus.DebugLevel
 
