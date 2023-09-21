@@ -34,7 +34,6 @@ type JwtCtrl struct{}
 // 	return careId
 // }
 
-// /// create token
 // func (j jwtCtrl) CreateToken(careId string) (string, error) {
 // 	var err error
 
@@ -51,7 +50,7 @@ type JwtCtrl struct{}
 // 	return token, nil
 // }
 
-//jwt service
+// jwt service
 type JWTService interface {
 	GenerateToken(email string, isUser bool) string
 	ValidateToken(token string) (*jwt.Token, error)
@@ -67,7 +66,7 @@ type jwtServices struct {
 	issure    string
 }
 
-//auth-jwt
+// auth-jwt
 func JWTAuthService() JWTService {
 	return &jwtServices{
 		secretKey: getSecretKey(),
@@ -120,15 +119,15 @@ func (j JwtCtrl) ExtractClaims(tokenStr string) (jwt.MapClaims, bool) {
 	hmacSecretString := "jdnfksdmfksd" // Value
 	hmacSecret := []byte(hmacSecretString)
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-  
+
 		// check token signing method etc
 		return hmacSecret, nil
 	})
-	fmt.Println("Parse ] ]",err)
+	fmt.Println("Parse ] ]", err)
 	if err != nil {
 		return nil, false
 	}
-	
+
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		return claims, true
 	} else {
