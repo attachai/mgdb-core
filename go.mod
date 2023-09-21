@@ -3,7 +3,9 @@ module github.com/attachai/mgdb-core
 go 1.16
 
 require (
+	github.com/FusionAuth/go-client v0.0.0-20230727220333-2d8a30ba4996 // indirect
 	github.com/coolbed/mgo-oid v0.0.0-20170627135709-d2b570933ac9
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gin-gonic/gin v1.7.2
 	github.com/go-ini/ini v1.62.0
 	github.com/go-playground/validator/v10 v10.6.1 // indirect
