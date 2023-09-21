@@ -7,6 +7,8 @@ import (
 	"math/rand"
 	"os"
 	"reflect"
+	"strconv"
+	"strings"
 	"time"
 
 	oid "github.com/coolbed/mgo-oid"
@@ -16,7 +18,8 @@ import (
 )
 
 // const charset = "abcdefghijklmnopqrstuvwxyz" +
-// 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+//
+//	"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 const charset = "0123456789"
 
 var seededRand *rand.Rand = rand.New(
@@ -34,7 +37,7 @@ func RandomCode(length int) string {
 	return StringWithCharset(length, charset)
 }
 
-//GenerateID function is for Generate Document id
+// GenerateID function is for Generate Document id
 func GenerateID(prefix string) string {
 	objectID := oid.NewOID()
 	// fmt.Println("object id:", objectID.String())
@@ -53,7 +56,7 @@ type StrSlice struct {
 	Str []string
 }
 
-//convertToSlice is to convert string to array
+// convertToSlice is to convert string to array
 func ConvertToSlice(s string) []string {
 	var str []string
 	err := json.Unmarshal([]byte(s), &str)
@@ -63,7 +66,7 @@ func ConvertToSlice(s string) []string {
 	return str
 }
 
-//ConvertOperators is to convert Query Operators
+// ConvertOperators is to convert Query Operators
 func ConvertOperators(data interface{}) interface{} {
 	if reflect.ValueOf(data).Kind() == reflect.Slice {
 		d := reflect.ValueOf(data)
@@ -92,7 +95,34 @@ func ConvertOperators(data interface{}) interface{} {
 	return data
 }
 
-//MapOperators for set Query Operators
+func CheckJsonData(jsondata map[string]interface{}) map[string]interface{} {
+	for key, result := range jsondata {
+		if reflect.TypeOf(result).Kind().String() == "slice" {
+			for _, r := range jsondata[key].([]interface{}) {
+				if reflect.TypeOf(r).Kind().String() == "map" {
+					subData := r.(map[string]interface{})
+
+					for _, result := range subData {
+						if reflect.TypeOf(result).Kind().String() == "slice" {
+
+							CheckJsonData(subData)
+						}
+					}
+					if key != "image" {
+						if _, ok := r.(map[string]interface{})["id"]; !ok {
+							r.(map[string]interface{})["id"] = GenerateID("Ar")
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	return jsondata
+}
+
+// MapOperators for set Query Operators
 func MapOperators(str string) string {
 	switch str {
 	//---MongoDB Query Operators---//
@@ -492,6 +522,23 @@ func GetEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
+func GetEnvVariableBool(key string) bool {
+
+	// load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+	rbool, _ := strconv.ParseBool(os.Getenv(key))
+	return rbool
+}
+
+func GetVariableBool(key string) bool {
+
+	rbool, _ := strconv.ParseBool(key)
+	return rbool
+}
 func GetUrl(ipAddress string, apiGroup string, apiEndpoint string) string {
 	var url string
 	if ipAddress != "" {
@@ -510,23 +557,6 @@ func GetUrl(ipAddress string, apiGroup string, apiEndpoint string) string {
 // use viper package to read .env file
 // return the value of the key
 func ViperEnvVariable(key string) string {
-
-	// SetConfigFile explicitly defines the path, name and extension of the config file.
-	// Viper will use this and not check any of the config paths.
-	// .env - It will search for the .env file in the current directory
-	// viper.SetConfigFile(".env")
-
-	// Find and read the config file
-	// err := viper.ReadInConfig()
-
-	// if err != nil {
-	// 	log.Fatalf("Error while reading config file %s", err)
-	// }
-
-	// viper.Get() returns an empty interface{}
-	// to get the underlying type of the key,
-	// we have to do the type assertion, we know the underlying value is string
-	// if we type assert to other type it will throw an error
 	value := viper.Get(key)
 
 	return fmt.Sprint(value)
@@ -541,6 +571,216 @@ func ContainInSlice(slice []string, val string) bool {
 	return false
 }
 
+func GetMonthNameTH(month int) string {
+
+	switch month {
+	//---MongoDB Query Operators---//
+	//comparison
+	case 1:
+		return "มกราคม"
+	case 2:
+		return "กุมภาพันธ์"
+	case 3:
+		return "มีนาคม"
+	case 4:
+		return "เมษายน"
+	case 5:
+		return "พฤษภาคม"
+	case 6:
+		return "มิถุนายน"
+	case 7:
+		return "กรกฎาคม"
+	case 8:
+		return "สิงหาคม"
+	case 9:
+		return "กันยายน"
+	case 10:
+		return "ตุลาคม"
+	case 11:
+		return "พฤศจิกายน"
+	case 12:
+		return "ธันวาคม"
+	}
+	return ""
+}
+
+///
+
+// 23 สิงหาคม 2564 18:27:50
+func FormatDateTimeTH(raw string) string {
+	/// 543
+
+	splitDateTime := strings.Split(raw, " ")
+	date := splitDateTime[0]
+	time := splitDateTime[1]
+
+	dateSplit := strings.Split(date, "-")
+	year := dateSplit[0]
+	month := dateSplit[1]
+	day := dateSplit[2]
+
+	intYear, _ := strconv.Atoi(year)
+	intMonth, _ := strconv.Atoi(month)
+	newYear := intYear + 543
+	year = strconv.Itoa(newYear)
+
+	// result :=  day + GetMonthNameTH(intMonth) + year + time
+	return day + " " + GetMonthNameTH(intMonth) + " " + year + " " + time
+}
+
+func ParseFloat64ToInt64(input float64) int64 {
+	var a float64 = input
+	var b int = int(a)
+	c := int64(b)
+	return c
+}
+
+// input : string month
+func MapMonth(monthStr string) string {
+	var month string
+	switch monthStr {
+	case "January":
+		month = "1"
+	case "February":
+		month = "2"
+
+	case "March":
+		month = "3"
+	case "April":
+		month = "4"
+
+	case "May":
+		month = "5"
+	case "June":
+		month = "6"
+	case "July":
+		month = "7"
+
+	case "August":
+		month = "8"
+	case "September":
+		month = "9"
+	case "October":
+		month = "10"
+
+	case "November":
+		month = "11"
+	case "December":
+		month = "12"
+	}
+
+	return month
+}
+
+// 01/07/2022 input format1
+// 2022-08-20T08:44:18.127Z input format2
+func SpilitDate(input string) (year string, month string, day string) {
+	year = ""
+	month = ""
+	day = ""
+	if input != "" {
+		if strings.Contains(input, "T") {
+			dateSplit := strings.Split(input, "T")
+			if len(dateSplit) > 0 {
+				dateSplit := strings.Split(dateSplit[0], "-")
+				year = dateSplit[0]
+				month = dateSplit[1]
+				day = dateSplit[2]
+			}
+		} else if strings.Contains(input, "/") {
+			dateSplit := strings.Split(input, "/")
+			if len(dateSplit) > 0 {
+				year = dateSplit[2]
+				month = dateSplit[1]
+				day = dateSplit[0]
+			}
+		}
+	}
+	return year, month, day
+}
+
+// fetch input  time 30m0s , 1h30m0s
+func FetchTime(input string) (hr string, min string) {
+	if len(input) > 0 {
+		if strings.Contains(input, "h") { //case : 1h30m0s
+			result := strings.Split(input, "h")
+			hr = result[0]
+			resultMin := strings.Split(result[1], "m")
+			min = resultMin[0]
+		} else { //case : 30m0s
+			result := strings.Split(input, "m")
+			hr = "0"
+			min = result[0]
+			if strings.Contains(min, "s") {
+				min = strings.Trim(min, "s")
+			}
+		}
+	}
+	return hr, min
+}
+
+func ConvertStringToInt(input string) int {
+	out, err := strconv.Atoi(input)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return out
+}
+
+func ToString(input interface{}) string {
+	newStr := fmt.Sprint(input)
+	if newStr == "0" {
+		newStr = "00"
+	}
+	return newStr
+}
+
+// 0 = 0.00
+// 15 = 0.25
+// 30 = 0.50
+// 45 = 0.75
+// 60 = 1
+func MapMinuteHour(input string) (string, string) {
+	hrStr := "0"
+	minStr := "0"
+	if strings.Contains(input, ".") {
+		strSplit := strings.Split(input, ".")
+		interger := strSplit[0]
+		decimal := strSplit[1]
+		if decimal == "00" {
+			hrStr = interger
+			minStr = "00"
+		} else if decimal == "25" {
+			hrStr = interger
+			minStr = "15"
+		} else if decimal == "50" || decimal == "5" {
+			hrStr = interger
+			minStr = "30"
+		} else if decimal == "75" {
+			hrStr = interger
+			minStr = "45"
+		}
+	} else { // จน เต็ม
+		hrStr = input
+		minStr = "00"
+	}
+	return hrStr, minStr
+}
+
+func ReverseFormatDate(input string) string {
+	result := ""
+	if input != "" {
+		dateSplit := strings.Split(input, "/")
+		if len(dateSplit) > 0 {
+			year := dateSplit[0]
+			month := dateSplit[1]
+			day := dateSplit[2]
+			result = day + "/" + month + "/" + year
+		}
+	}
+	return result
+}
+
 func NewBoolean(state bool) *bool {
 	if state == true {
 		state = true
@@ -548,4 +788,355 @@ func NewBoolean(state bool) *bool {
 		state = false
 	}
 	return &state
+}
+
+func FindNextDate(then time.Time, monday bool, tuesday bool, wednesday bool, thursday bool, friday bool, saturday bool, sunday bool) time.Time {
+	// fmt.Println("FindNextDate2 :", then)
+
+	for {
+		if int(then.Weekday()) == 0 {
+			if sunday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 1 {
+			if monday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 2 {
+			if tuesday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 3 {
+			if wednesday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 4 {
+			if thursday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 5 {
+			if friday == true {
+				return then
+			}
+
+		} else if int(then.Weekday()) == 6 {
+			if saturday == true {
+				return then
+			}
+
+		}
+		then = then.AddDate(0, 0, 1)
+	}
+
+	return then
+}
+
+func CalculateStartDate(then time.Time, monday bool, tuesday bool, wednesday bool, thursday bool, friday bool, saturday bool, sunday bool) (time.Time, bool) {
+	isFixWeekDay := false
+	if monday == false && tuesday == false && wednesday == false && thursday == false && friday == false && saturday == false && sunday == false {
+		return then, isFixWeekDay
+	}
+	for {
+		if int(then.Weekday()) == 0 {
+			if sunday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 1 {
+			if monday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 2 {
+			if tuesday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 3 {
+			if wednesday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 4 {
+			if thursday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 5 {
+			if friday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		} else if int(then.Weekday()) == 6 {
+			if saturday == true {
+				isFixWeekDay = true
+				return then, isFixWeekDay
+			}
+
+		}
+		then = then.AddDate(0, 0, 1)
+	}
+
+	// if sunday { //0
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 0 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 0 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else	if monday { //1
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 1 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 1 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else if tuesday { //2
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 2 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 2 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else if wednesday { //3
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 3 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 3 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else if thursday { //4
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 4 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 4 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else if friday { //5
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 5 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 5 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// } else if saturday { //6
+	// 	isFixWeekDay = true
+	// 	if int(then.Weekday()) != 6 {
+	// 		for {
+	// 			then = then.AddDate(0, 0, 1)
+	// 			if int(then.Weekday()) == 6 {
+	// 				break
+	// 			}
+	// 		}
+	// 	}
+	// }
+	return then, isFixWeekDay
+}
+
+// /input 2022-07-01T08:44:18.127Z
+// / 01/07/2022
+func FormatDateStartGen(input string) string {
+	if input != "" {
+		if strings.Contains(input, "T") {
+			splitStr := strings.Split(input, "T")
+			date := splitStr[0]
+			splitStr = strings.Split(date, "-")
+			day := splitStr[2]
+			month := splitStr[1]
+			year := splitStr[0]
+
+			newStr := day + "/" + month + "/" + year
+			return newStr
+		}
+
+	}
+	return ""
+}
+
+// /input 2022-07-26 16:39:48.5215856 +0700 +07
+// / 01/07/2022
+func FormatDateStartNotT(input string) string {
+	if input != "" {
+		if strings.Contains(input, " ") {
+			splitStr := strings.Split(input, " ")
+			date := splitStr[0]
+			splitStr = strings.Split(date, "-")
+			day := splitStr[2]
+			month := splitStr[1]
+			year := splitStr[0]
+
+			newStr := day + "/" + month + "/" + year
+			return newStr
+		}
+
+	}
+	return ""
+}
+
+// input 26/08/2022 13:30
+func FormatSortDate(intput string) time.Time {
+
+	sp := strings.Split(intput, " ")
+	datestr := sp[0]
+	timestr := sp[1]
+	timestrSplit := strings.Split(timestr, ":")
+	hrstr := timestrSplit[0]
+	minstr := timestrSplit[1]
+	yearstr, monthstr, daystr := SpilitDate(datestr)
+
+	yearInt, err := strconv.Atoi(yearstr) //
+	if err != nil {
+		fmt.Println(err.Error())
+		// return nil
+	}
+	monthInt, err := strconv.Atoi(monthstr) //
+	if err != nil {
+		fmt.Println(err.Error())
+		// return ""
+	}
+	dayInt, err := strconv.Atoi(daystr) //
+	if err != nil {
+		fmt.Println(err.Error())
+		// return ""
+	}
+	hrInt, err := strconv.Atoi(hrstr) //
+	if err != nil {
+		fmt.Println(err.Error())
+		// return ""
+	}
+	minInt, err := strconv.Atoi(minstr) //
+	if err != nil {
+		fmt.Println(err.Error())
+		// return ""
+	}
+	month := time.Month(monthInt)
+
+	then := time.Date(yearInt, month, dayInt, hrInt, minInt, 0, 0, time.Now().Location())
+
+	return then
+}
+
+// input formate 2022-03-17 08:00
+func GetDateFromString(intput string) (year int, month int, day int, hour int, min int) {
+	year = 0
+	month = 0
+	day = 0
+	hour = 0
+	min = 0
+	if intput != "" {
+		if strings.Contains(intput, " ") {
+			splitDateTime := strings.Split(intput, " ")
+			if len(splitDateTime) > 0 {
+				datestr := splitDateTime[0]
+				timestr := splitDateTime[1]
+
+				yearStr, monthStr, dayStr := SpilitDate(datestr)
+
+				hourstr, minstr := SpilitTime(timestr)
+
+				year, err := strconv.Atoi(yearStr)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				month, err := strconv.Atoi(monthStr)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				day, err := strconv.Atoi(dayStr)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				hour, err := strconv.Atoi(hourstr)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+
+				min, err := strconv.Atoi(minstr)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				return year, month, day, hour, min
+			}
+		}
+
+	}
+
+	return year, month, day, hour, min
+}
+
+// formate 08:00
+func SpilitTime(input string) (hour string, min string) {
+	if input != "" {
+		new := strings.Split(input, ":")
+		hour := new[0]
+		min := new[1]
+		return hour, min
+	}
+	return "", ""
+}
+
+// 01-02-2006 15:04:05 input
+func SpilitOnlyYMD(input string) (day string, month string, year string) {
+	year = ""
+	month = ""
+	day = ""
+	if input != "" {
+		if strings.Contains(input, " ") {
+			dateSplit := strings.Split(input, " ")
+			if len(dateSplit) > 0 {
+				dateSplit := strings.Split(dateSplit[0], "-")
+				month = dateSplit[0]
+				//fmt.Println(dateSplit[0])
+				day = dateSplit[1]
+				//fmt.Println(dateSplit[1])
+				year = dateSplit[2]
+				//fmt.Println(dateSplit[2])
+			}
+		}
+	}
+	return day, month, year
+}
+
+// rr-2305-001 input
+func SpilitCodeForLastIndex(input string) string {
+	var lastIndex string
+	if input != "" {
+		if len(input) > 0 {
+			input := strings.Split(input, "-")
+			lastIndex = input[len(input)-1]
+		}
+	}
+	return lastIndex
 }
