@@ -15,9 +15,9 @@ import (
 
 	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
 	"github.com/attachai/mgdb-core/packages/logging"
-	"github.com/attachai/mgdb-core/packages/setting"
 	"github.com/attachai/mgdb-core/utils"
 
+	cnst "github.com/attachai/mgdb-core/app/const"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -29,7 +29,7 @@ func (auth *ReadController) FindDocumentObj(jsonPost structService.JsonService) 
 
 	byteArray, err := json.Marshal(jsonPost)
 	if err != nil {
-		logging.Logger(setting.LogLevelSetting.Error, err)
+		logging.Logger(cnst.Error, err)
 	}
 	//fmt.Println("byteArray=", string(byteArray))
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -44,7 +44,7 @@ func (auth *ReadController) FindDocumentObjCount(jsonPost structService.JsonServ
 
 	byteArray, err := json.Marshal(jsonPost)
 	if err != nil {
-		logging.Logger(setting.LogLevelSetting.Error, err)
+		logging.Logger(cnst.Error, err)
 	}
 	//fmt.Println("byteArray=", string(byteArray))
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -119,9 +119,9 @@ func (auth *ReadController) FindDocument(c *gin.Context, count bool) (bool, inte
 		result, err, collection := userservice.AggregateDocument(pipeline, jsonbody.Collection)
 		if err != nil || !collection {
 			if !collection {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following item haven't gotten", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following item haven't gotten", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following item haven't gotten", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following item haven't gotten", "errors": err.Error()})
 			}
 		} else {
 			// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following items have gotten successfully", "results": result})
@@ -151,9 +151,9 @@ func (auth *ReadController) FindDocument(c *gin.Context, count bool) (bool, inte
 		result, err, collection := userservice.FindDocument(filter, projection, jsonbody.Collection, jsonbody.Sort, int64(limit), int64(skip))
 		if err != nil || !collection {
 			if !collection {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following item haven't gotten", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following item haven't gotten", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following item haven't gotten", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following item haven't gotten", "errors": err.Error()})
 			}
 		} else {
 			// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following items have gotten successfully", "results": result})

@@ -9,11 +9,11 @@ import (
 	"net/http/httptest"
 	"time"
 
+	cnst "github.com/attachai/mgdb-core/app/const"
 	"github.com/attachai/mgdb-core/app/models/model_name_db/db/service"
 	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
 	structService "github.com/attachai/mgdb-core/app/structs"
 	"github.com/attachai/mgdb-core/packages/logging"
-	"github.com/attachai/mgdb-core/packages/setting"
 	"github.com/attachai/mgdb-core/utils"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func (u *DeleteController) DeleteDocumentObj(jsonPost structService.JsonService)
 
 	byteArray, err := json.Marshal(jsonPost)
 	if err != nil {
-		logging.Logger(setting.LogLevelSetting.Error, err)
+		logging.Logger(cnst.Error, err)
 	}
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
 	c.Request, _ = http.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("{}")))
@@ -70,9 +70,9 @@ func (u *DeleteController) DeleteDocument(c *gin.Context) (bool, interface{}) {
 			id, err, coll := userservice.FindOneAndDelete(condition, jsonbody.Collection)
 			if err != nil || !coll {
 				if !coll {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
 				} else {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
 				}
 			} else {
 				// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following users have deleted successfully", "results": id})
@@ -105,9 +105,9 @@ func (u *DeleteController) DeleteDocument(c *gin.Context) (bool, interface{}) {
 			id, err, coll := userservice.FindOneAndUpdate(condition, arrayFilters, update, jsonbody.Collection)
 			if err != nil || !coll {
 				if !coll {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
 				} else {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
 				}
 			} else {
 				// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following users have deleted successfully", "results": id})
@@ -128,9 +128,9 @@ func (u *DeleteController) DeleteDocument(c *gin.Context) (bool, interface{}) {
 			id, err, coll := userservice.DeleteMany(condition, jsonbody.Collection)
 			if err != nil || !coll {
 				if !coll {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
 				} else {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
 				}
 			} else {
 				// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following users have deleted successfully", "results": id})
@@ -147,9 +147,9 @@ func (u *DeleteController) DeleteDocument(c *gin.Context) (bool, interface{}) {
 			id, err, coll := userservice.DeleteManyWithFilter(condition, update, jsonbody.Collection)
 			if err != nil || !coll {
 				if !coll {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": "Collection not found!"})
 				} else {
-					c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
+					c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following user haven’t deleted", "errors": err.Error()})
 				}
 			} else {
 				// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following users have deleted successfully", "results": id})

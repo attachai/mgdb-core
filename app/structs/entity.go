@@ -46,6 +46,12 @@ type Validateresponse struct {
 	AppId  string `json:"appId"`
 }
 
+type Img struct {
+	Id       string `json:"id,omitempty"`
+	Url      string `json:"url,omitempty"`
+	FileType string `json:"fileType,omitempty"`
+	Name     string `json:"name,omitempty"`
+}
 type Image struct {
 	Id       string `json:"id,omitempty"`
 	Url      string `json:"url,omitempty"`

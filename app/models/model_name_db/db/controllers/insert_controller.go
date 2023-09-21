@@ -16,9 +16,9 @@ import (
 	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
 	structService "github.com/attachai/mgdb-core/app/structs"
 	"github.com/attachai/mgdb-core/packages/logging"
-	"github.com/attachai/mgdb-core/packages/setting"
 	"github.com/attachai/mgdb-core/utils"
 
+	cnst "github.com/attachai/mgdb-core/app/const"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -30,7 +30,7 @@ func (create *CreateController) InsertDocumentObj(jsonPost structService.JsonSer
 
 	byteArray, err := json.Marshal(jsonPost)
 	if err != nil {
-		logging.Logger(setting.LogLevelSetting.Error, err)
+		logging.Logger(cnst.Error, err)
 	}
 	fmt.Println("byteArray InsertDocumentObj= =", string(byteArray))
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -80,7 +80,7 @@ func insertNewDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, interfa
 	case reflect.Slice:
 		//check if Atomicity feild not setup
 		if !jsonbody.Atomicity {
-			c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": "Atomicity not setup!"})
+			c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": "Atomicity not setup!"})
 			break
 		}
 		var jsondata []interface{}
@@ -107,9 +107,9 @@ func insertNewDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, interfa
 		id, err, col := userservice.InsertManyDocuments(jsondata, jsonbody.Collection)
 		if err != nil || !col {
 			if !col {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
 			}
 		} else {
 			result = true
@@ -138,9 +138,9 @@ func insertNewDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, interfa
 		id, err, col := userservice.InsertOneDocument(jsondata, jsonbody.Collection)
 		if err != nil || !col {
 			if !col {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
 			}
 		} else {
 			result = true
@@ -231,9 +231,9 @@ func insertWithCondition(jsonbody structs.Jsonbody, c *gin.Context) (bool, inter
 	// fmt.Println("id :: ", id)
 	if err != nil || !col {
 		if !col {
-			c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
+			c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": "Collection not found!"})
 		} else {
-			c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
+			c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't created", "errors": err.Error()})
 		}
 	} else {
 		result = true

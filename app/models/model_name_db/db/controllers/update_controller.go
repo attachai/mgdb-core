@@ -16,9 +16,9 @@ import (
 
 	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
 	"github.com/attachai/mgdb-core/packages/logging"
-	"github.com/attachai/mgdb-core/packages/setting"
 	"github.com/attachai/mgdb-core/utils"
 
+	cnst "github.com/attachai/mgdb-core/app/const"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -30,7 +30,7 @@ func (u *UpdateController) UpdateDocumentObj(jsonPost structService.JsonService)
 
 	byteArray, err := json.Marshal(jsonPost)
 	if err != nil {
-		logging.Logger(setting.LogLevelSetting.Error, err)
+		logging.Logger(cnst.Error, err)
 	}
 	fmt.Println("update =  = =", string(byteArray))
 	c, _ := gin.CreateTestContext(httptest.NewRecorder())
@@ -156,9 +156,9 @@ func updateOneDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, interfa
 		id, err, coll := userservice.FindOneAndUpdate(condition, arrayFilters, update, jsonbody.Collection)
 		if err != nil || !coll {
 			if !coll {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
 			}
 		} else {
 			// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following data have updated successfully", "results": id})
@@ -176,9 +176,9 @@ func updateOneDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, interfa
 		id, err, coll := userservice.FindOneAndReplace(condition, update, jsonbody.Collection)
 		if err != nil || !coll {
 			if !coll {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
 			} else {
-				c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
+				c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
 			}
 		} else {
 			// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following data have updated successfully", "results": id})
@@ -204,9 +204,9 @@ func updateMultipleDocument(jsonbody structs.Jsonbody, c *gin.Context) (bool, in
 	id, err, coll := userservice.UpdateManyDocuments(condition, update, jsonbody.Collection)
 	if err != nil || !coll {
 		if !coll {
-			c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
+			c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": "Collection not found!"})
 		} else {
-			c.JSON(500, gin.H{"statusCode": setting.AppSetting.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
+			c.JSON(500, gin.H{"statusCode": cnst.HTTP500, "message": "The following data haven't updated", "errors": err.Error()})
 		}
 	} else {
 		// c.JSON(200, gin.H{"statusCode": setting.AppSetting.HTTP200, "message": "The following data have updated successfully", "results": id})
