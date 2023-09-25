@@ -11,4 +11,7 @@ const (
 	FusionHost    = "fusionHost"
 	ApiKey        = "apiKey"
 	HTTPPort      = "HTTPPort"
+	ServerAuthen  = "ServerAuthen"
+	Token         = "token"
+	Collection    = "collection"
 )
