@@ -4,4 +4,5 @@ const (
 	TokenNotFound      = 100
 	PathParamNotFound  = 120
 	QueryParamNotMatch = 120
+	QueryParamMatch    = 200
 )
