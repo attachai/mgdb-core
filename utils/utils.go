@@ -509,7 +509,15 @@ func MapOperators(str string) string {
 	}
 	return str
 }
-
+func GetEnv(key string) string {
+	return GetEnvVariable(key)
+}
+func GetEnvBool(key string) bool {
+	return GetEnvVariableBool(key)
+}
+func GetYaml(key string) string {
+	return ViperEnvVariable(key)
+}
 func GetEnvVariable(key string) string {
 
 	// load .env file

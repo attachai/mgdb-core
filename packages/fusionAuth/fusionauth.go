@@ -1,7 +1,7 @@
 package fusionAuth
 
 import (
-	cnst "github.com/attachai/mgdb-core/app/const"
+	cnst "github.com/attachai/mgdb-core/app/cnst"
 	"github.com/attachai/mgdb-core/app/structs"
 	coreStructs "github.com/attachai/mgdb-core/app/structs"
 	"github.com/attachai/mgdb-core/utils"

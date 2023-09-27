@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	cnst "github.com/attachai/mgdb-core/app/const"
+	cnst "github.com/attachai/mgdb-core/app/cnst"
 	"github.com/attachai/mgdb-core/app/structs"
 	"github.com/attachai/mgdb-core/utils"
 	"github.com/sirupsen/logrus"

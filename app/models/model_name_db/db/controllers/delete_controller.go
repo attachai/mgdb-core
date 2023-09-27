@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"time"
 
-	cnst "github.com/attachai/mgdb-core/app/const"
+	cnst "github.com/attachai/mgdb-core/app/cnst"
 	"github.com/attachai/mgdb-core/app/models/model_name_db/db/service"
 	"github.com/attachai/mgdb-core/app/models/model_name_db/structs"
 	structService "github.com/attachai/mgdb-core/app/structs"

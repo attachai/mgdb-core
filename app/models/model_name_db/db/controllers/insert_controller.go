@@ -18,7 +18,7 @@ import (
 	"github.com/attachai/mgdb-core/packages/logging"
 	"github.com/attachai/mgdb-core/utils"
 
-	cnst "github.com/attachai/mgdb-core/app/const"
+	cnst "github.com/attachai/mgdb-core/app/cnst"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
